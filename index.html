@@ -3,313 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al-Asfour Portal</title>
+    <title>Al-Asfour Portal (Encrypted)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        /* SAME STYLES AS BEFORE */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root { --primary: #4B0082; --primary-gradient: linear-gradient(135deg, #4B0082 0%, #8a2be2 100%); --light-bg: #f8f4fa; }
+        body { background-color: var(--light-bg); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
 
-        :root {
-            /* We kept the purple theme to match your brand */
-            --primary: #4B0082; 
-            --primary-light: #7a1a96;
-            --primary-dark: #300052;
-            --primary-gradient: linear-gradient(135deg, #4B0082 0%, #8a2be2 100%);
-            --accent: #ff6b9d;
-            --light-bg: #f8f4fa;
-            --card-bg: #ffffff;
-            --text: #333333;
-            --text-light: #666666;
-        }
+        /* Login Screen */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-gradient); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .login-box { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; width: 90%; max-width: 400px; }
+        .login-input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee; border-radius: 8px; font-size: 16px; outline: none; }
+        .login-btn { background: #4B0082; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; }
+        .error-msg { color: red; margin-top: 10px; display: none; }
 
-        body {
-            background-color: var(--light-bg);
-            color: var(--text);
-            line-height: 1.6;
-            background-image: 
-                radial-gradient(circle at 5% 15%, rgba(96, 0, 124, 0.03) 0%, transparent 20%),
-                radial-gradient(circle at 95% 85%, rgba(138, 43, 226, 0.03) 0%, transparent 20%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 16px;
-            margin-bottom: 50px;
-            box-shadow: 0 15px 35px rgba(96, 0, 124, 0.2);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* LOGO STYLING ADDED HERE */
-        .header-logo {
-            max-width: 200px;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
-            background-size: 200% 200%, cover;
-            animation: shimmer 8s infinite linear;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0, 0 0; }
-            100% { background-position: 200% 0, 0 0; }
-        }
-
-        h1 {
-            font-size: 3.2rem;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-            font-weight: 300;
-            line-height: 1.8;
-        }
-
-        /* Apps Grid */
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 35px;
-            margin-bottom: 50px;
-        }
-
-        .app-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(96, 0, 124, 0.08);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            border: 1px solid rgba(96, 0, 124, 0.08);
-            position: relative;
-        }
-
-        .app-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s ease;
-        }
-
-        .app-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(96, 0, 124, 0.15);
-        }
-
-        .app-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .app-icon {
-            height: 170px;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 4rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .app-icon::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .app-card:hover .app-icon::after {
-            opacity: 1;
-        }
-
-        .app-content {
-            padding: 30px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .app-title {
-            font-size: 1.6rem;
-            margin-bottom: 15px;
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .app-desc {
-            color: var(--text-light);
-            margin-bottom: 25px;
-            flex-grow: 1;
-            line-height: 1.7;
-        }
-
-        .app-link {
-            display: inline-block;
-            background: var(--primary-gradient);
-            color: white;
-            text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(96, 0, 124, 0.3);
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .app-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(96, 0, 124, 0.4);
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 35px 20px;
-            color: var(--text-light);
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            margin-top: 50px;
-            box-shadow: 0 8px 25px rgba(96, 0, 124, 0.05);
-            border: 1px solid rgba(96, 0, 124, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--primary-gradient);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .apps-grid { grid-template-columns: 1fr; }
-        }
+        /* Dashboard (Hidden initially) */
+        #main-dashboard { display: none; width: 100%; max-width: 1200px; padding: 20px; }
+        
+        /* Cards & Header */
+        header { text-align: center; padding: 40px 20px; background: var(--primary-gradient); color: white; border-radius: 16px; margin-bottom: 50px; margin-top: 20px; }
+        .header-logo { max-width: 200px; background: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 35px; }
+        .app-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 8px 25px rgba(96,0,124,0.08); text-align: center; transition: transform 0.3s; }
+        .app-card:hover { transform: translateY(-10px); }
+        .app-icon { font-size: 3.5rem; color: #4B0082; margin-bottom: 20px; display: block; }
+        .app-title { font-size: 1.4rem; margin-bottom: 10px; color: #4B0082; font-weight: 700; }
+        .app-desc { color: #666; margin-bottom: 20px; min-height: 50px; }
+        
+        /* The link buttons start disabled */
+        .app-link { display: block; background: #ccc; color: white; text-decoration: none; padding: 12px; border-radius: 8px; pointer-events: none; }
+        .app-link.unlocked { background: #4B0082; pointer-events: auto; cursor: pointer; }
+        
+        footer { text-align: center; padding: 30px; color: #666; margin-top: 50px; }
     </style>
 </head>
 <body>
-    
-    <div class="container">
+
+    <div id="login-screen">
+        <div class="login-box">
+            <img src="logo.jpg" alt="Logo" style="width: 100px; margin-bottom: 20px;">
+            <h2 style="margin-bottom: 10px; color: #333;">Secure Access</h2>
+            <input type="password" id="password-input" class="login-input" placeholder="Enter Password">
+            <button class="login-btn" onclick="unlockPortal()">Unlock Portal</button>
+            <p id="error-message" class="error-msg">Incorrect Password</p>
+        </div>
+    </div>
+
+    <div id="main-dashboard">
         <header>
             <img src="logo.jpg" alt="Al-Asfour Logo" class="header-logo">
-            
             <h1>Al-Asfour Portal</h1>
-            <p class="subtitle">Access all your business management tools from a single, unified dashboard.</p>
+            <p>Secure Business Management Dashboard</p>
         </header>
 
         <div class="apps-grid">
             <div class="app-card">
-                <div class="app-icon">
-                    <i class="fas fa-clipboard-list"></i>
-                </div>
-                <div class="app-content">
-                    <h3 class="app-title">Workshop Job Orders</h3>
-                    <p class="app-desc">Create, manage, and track Work Orders with real-time status updates.</p>
-                    <a href="https://script.google.com/macros/s/AKfycbxa_CR_eVl3qLvq9RqRqrSISfQ4h1G0bY6D3oRZbsfso2U3drufAZ2bkAgagQ9nH0jXpw/exec" class="app-link" target="_blank">Launch App <i class="fas fa-arrow-right"></i></a>
-                </div>
+                <span class="app-icon"><i class="fas fa-clipboard-list"></i></span>
+                <h3 class="app-title">Workshop Job Orders</h3>
+                <p class="app-desc">Manage repairs and service requests.</p>
+                <a id="link-1" class="app-link" target="_blank">Locked</a>
             </div>
 
             <div class="app-card">
-                <div class="app-icon">
-                    <i class="fas fa-couch"></i>
-                </div>
-                <div class="app-content">
-                    <h3 class="app-title">Property Inventory</h3>
-                    <p class="app-desc">Track furniture and curtains assigned to specific units or houses.</p>
-                    <a href="https://script.google.com/macros/s/AKfycbxDcKHKXwaHxZ8gi0ESlYynj_JBjAcnaFkmZ_lj_xZO6LfowFG_9ymIiPhor75LpkU8/exec" class="app-link" target="_blank">Launch App <i class="fas fa-arrow-right"></i></a>
-                </div>
+                <span class="app-icon"><i class="fas fa-couch"></i></span>
+                <h3 class="app-title">Property Inventory</h3>
+                <p class="app-desc">Track furniture and curtains.</p>
+                <a id="link-2" class="app-link" target="_blank">Locked</a>
             </div>
 
             <div class="app-card">
-                <div class="app-icon">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                </div>
-                <div class="app-content">
-                    <h3 class="app-title">Employee Expense Tracker</h3>
-                    <p class="app-desc">Manage Employee Expenses.</p>
-                    <a href="https://script.google.com/macros/s/AKfycbwBxeaCyZTuOXSsoM1krvhCjm1Lc5FMMJwhWwbl04ujI0HyWoO_zgOCePe05cJHJcOqSQ/exec" class="app-link" target="_blank">Launch App <i class="fas fa-arrow-right"></i></a>
-                </div>
+                <span class="app-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                <h3 class="app-title">Employee Expense Tracker</h3>
+                <p class="app-desc">Manage Employee Expenses.</p>
+                <a id="link-3" class="app-link" target="_blank">Locked</a>
             </div>
-            
-            <div class="app-card">
-                <div class="app-icon">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <div class="app-content">
-                    <h3 class="app-title">Business Manager Pro</h3>
-                    <p class="app-desc"> business administration tools.</p>
-                    <a href="https://script.google.com/macros/s/AKfycbze8v4Rl7rQIgpiuLY4M9ej65x0gDyF0QjDsV7l0gZOaMDy0UjEmJBQ6J7eBS2ljJ_w/exec" class="app-link" target="_blank">Launch App <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </div>
-
         </div>
 
-        <footer>
-            <p>© 2026 Al-Asfour Business Portal</p>
-        </footer>
+         <div class="app-card">
+                <span class="app-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                <h3 class="app-title">Business Manager Pro</h3>
+                <p class="app-desc">Manage POs and Invoices.</p>
+                <a id="link-4" class="app-link" target="_blank">Locked</a>
+            </div>
+        </div>
+
+        <footer>© 2026 Al-Asfour Business Portal</footer>
     </div>
 
+    <script>
+        // ---------------------------------------------------------
+        // PASTE YOUR "SECRET CODES" (Generated from encrypt.html) HERE
+        // ---------------------------------------------------------
+        const encryptedLinks = {
+            // Replace these long strings with YOUR generated strings
+            app1: "U2FsdGVkX196WQi3pv+r/zeZmaOwPYhtdKQaB2Ya67/SvFM5et6ER1zvgblpOT3DAPz/OrwS8uAP74tUJFaJgjdZRcyNPVMLsILBaBxirITzTIuQxBXP65jZPKpN2vmF/wwrZeNLFai3wK41f44r4TZZU084SS+35+a2OTflXFdtFYvMTIRK06E+aRjzr054", 
+            app2: "U2FsdGVkX18kfR8HhHC09hTFnKKebnEObh5+hznETrTPSG3sGPQHz21+L3lpO9NC0sk+zmGmYPwYdEWWLWvK0FbcZna3dr4P29lwnJ0G5ZuI3L8N7s8mDu56nuD1ezITLzB0slkRJhANX+aGfu5Nci13pm63cbCr8V78ny+4jvPhiKOVNR5+s/BpZP6/+GH9",
+            app3: "U2FsdGVkX1/McNz0XV1C6KiqfEZVW0y9atU8SyRxMkHar7710hy6neeBbSv9mrcL5MPAk2RfZ2++jCEgBNoAgMxyx7IGR3lraNHxFPvoIEGrkeW7F36U+w0f1YYsNvV4iNjwy/Y6gnWI2TfR2L8Ffq9qBy7Da1QJ1OYmINOjR1mArij2Z/JqCFdwS7GAwrQN",
+            app4: "U2FsdGVkX18dihtDvmFmRn1SwBH8xoBnvKCcGgcLyvwUm1kCuhbdsHfIGTdS3i7EouU8IGDYbnuIak8cz/ROARe9a3U3len2Jz2fqYOD3Ba4vA1gjDh7bRNBIZBzoviTKRII8jm0szK8HtAlGI+ONTFyuQVpEJ4TfTZpK1Fe9tdUnzmqZWJUWhVWo8ciHyo9"
+        };
+
+        function unlockPortal() {
+            const password = document.getElementById('password-input').value;
+            
+            try {
+                // Attempt to decrypt App 1 to check if password is correct
+                // If password is wrong, this will return an empty string or garbage
+                const decrypted1 = CryptoJS.AES.decrypt(encryptedLinks.app1, password).toString(CryptoJS.enc.Utf8);
+                
+                if (decrypted1 && decrypted1.startsWith("http")) {
+                    // SUCCESS! Password is correct.
+                    
+                    // Decrypt the others
+                    const decrypted2 = CryptoJS.AES.decrypt(encryptedLinks.app2, password).toString(CryptoJS.enc.Utf8);
+                    const decrypted3 = CryptoJS.AES.decrypt(encryptedLinks.app3, password).toString(CryptoJS.enc.Utf8);
+                    const decrypted4 = CryptoJS.AES.decrypt(encryptedLinks.app4, password).toString(CryptoJS.enc.Utf8);
+
+                    // Apply links to buttons
+                    activateButton("link-1", decrypted1);
+                    activateButton("link-2", decrypted2);
+                    activateButton("link-3", decrypted3);
+                    activateButton("link-4", decrypted4);
+
+                    // Show Dashboard
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-dashboard').style.display = 'block';
+                } else {
+                    throw new Error("Wrong password");
+                }
+            } catch (e) {
+                // FAIL
+                document.getElementById('error-message').style.display = 'block';
+                document.querySelector('.login-box').style.animation = "shake 0.5s";
+                setTimeout(() => document.querySelector('.login-box').style.animation = "", 500);
+            }
+        }
+
+        function activateButton(id, url) {
+            const btn = document.getElementById(id);
+            btn.href = url;
+            btn.innerText = "Launch App";
+            btn.classList.add("unlocked");
+        }
+        
+        // Shake animation style
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `@keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } 100% { transform: translateX(0); } }`;
+        document.head.appendChild(styleSheet);
+    </script>
 </body>
 </html>
